@@ -26,8 +26,8 @@ const Record = (props) => {
     <Swipeable renderRightActions={rightSwipe}>
       <View style={styles.container}>
         <Image source={{ uri: props.data.iconUrl }} style={styles.logo}></Image>
-        <Text style={styles.name}>{props.data.name}</Text>
-        <Text style={styles.price}>{props.data.price}</Text>
+        <Text style={styles.name}>{props.data.shortName}</Text>
+        <Text style={styles.price}>{props.data.regularMarketPrice}</Text>
       </View>
     </Swipeable>
   );

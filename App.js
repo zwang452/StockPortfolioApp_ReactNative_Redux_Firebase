@@ -4,8 +4,10 @@ import { Provider } from "react-redux";
 import store from "./redux/store";
 import AppNavigator from "./AppNavigator";
 import { Provider as PaperProvider } from "react-native-paper";
-
+import {LogBox} from 'react-native';
 export default function App() {
+  //The issue comes from Firebase using a deprecated version of AsyncStorage.  
+  LogBox.ignoreLogs(['AsyncStorage has been extracted from react-native core']);
   return (
     <Provider store={store}>
       <PaperProvider>

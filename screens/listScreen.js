@@ -14,8 +14,8 @@ const ListScreen = (props) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const safeArea = useSafeArea();
-  const deleteFromList = (id) => {
-    dispatch(deleteRecord(id));
+  const deleteFromList = (symbol) => {
+    dispatch(deleteRecord(symbol));
   };
   return (
     <View style={styles.container}>
@@ -26,10 +26,11 @@ const ListScreen = (props) => {
           return (
             <Record
               data={item}
-              onDelete={() => deleteFromList(item.id)}
+              onDelete={() => deleteFromList(item.symbol)}
             ></Record>
           );
         }}
+        keyExtractor={(item, index) => index.toString()}
         ItemSeparatorComponent={() => {
           return <View style={styles.seperator}></View>;
         }}
@@ -53,7 +54,7 @@ const ListScreen = (props) => {
           onPress={() => props.navigation.navigate("AddScreen")}
           style={{
             position: "absolute",
-            bottom: safeArea.bottom + 35,
+            bottom: safeArea.bottom + 85,
             backgroundColor: "white",
             right: 16,
           }}
@@ -63,36 +64,6 @@ const ListScreen = (props) => {
     </View>
   );
 };
-//   return (
-//     <View style={styles.container}>
-//       <FlatList
-//         style={styles.list}
-//         data={records}
-//         renderItem={({ item }) => {
-//           return (
-//             <Record
-//               data={item}
-//               onDelete={() => deleteFromList(item.id)}
-//             ></Record>
-//           );
-//         }}
-//         ItemSeparatorComponent={() => {
-//           return <View style={styles.seperator}></View>;
-//         }}
-//         ListHeaderComponent={() => {
-//           return (
-//             <View style = {styles.header}>
-//               <Text style = {{flex:1}}></Text>
-//               <Text style = {{flex:3}}>Company</Text>
-//               <Text style = {{flex:1}}>Price</Text>
-//             </View>
-//           );
-//         }}
-//       ></FlatList>
-//       <StatusBar style="auto" />
-//     </View>
-//   );
-// };
 export default ListScreen;
 const styles = StyleSheet.create({
   container: {

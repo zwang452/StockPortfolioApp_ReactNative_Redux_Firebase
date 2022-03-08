@@ -1,40 +1,128 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Modal, TextInput, Button } from "react-native";
-import { Searchbar, Menu } from "react-native-paper";
+import { View, Text, StyleSheet, Modal, TextInput } from "react-native";
+import { Searchbar, Menu, Avatar, Card, IconButton, Button } from "react-native-paper";
+import { addRecord } from "../redux/recordSlice";
 import { MaterialIcons } from "@expo/vector-icons";
-import Constants from 'expo-constants';
-import { Dimensions } from 'react-native';
+import Constants from "expo-constants";
+import { Dimensions } from "react-native";
+import { useSelector, useDispatch } from "react-redux";
 
-const windowWidth = Dimensions.get('window').width;
+const windowWidth = Dimensions.get("window").width;
 const RecordInput = (props) => {
   const [query, setQuery] = useState("");
   const [menuVisible, setMenuVisible] = useState(false);
-  const array = [0, 1, 2, 3, 4];
+  const [cardVisible, setCardVisible] = useState(false);
+  const [selectedStock, setSelected] = useState("");
+  const [companies, setCompanies] = useState([]);
+  const closeMenu = () => setMenuVisible(false);
+  const dispatch = useDispatch();
+  const addToList = () =>{
+    let url = {iconUrl: 'https://staffordonline.org/wp-content/uploads/2019/01/Google-600x600.jpg"'};
+    let record = {...selectedStock, ...url};
+    dispatch(addRecord(record));
 
+  }
+  const onPressMenuItem = (stock) => {
+    if (stock) {
+      fetch(
+        `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v6/finance/quote?symbols=${stock.symbol}`,
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-host":
+              "stock-data-yahoo-finance-alternative.p.rapidapi.com",
+            "x-rapidapi-key":
+              "def66e2ad7msh812217da7d5b03fp19e120jsnd95c93d205bb",
+          },
+        }
+      )
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw response;
+        })
+        .then((data) => {
+          setSelected(data.quoteResponse.result[0]);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+    closeMenu();
+    setCardVisible(true);
+  };
+
+  const stockNameAutoComplete = (text) => {
+    setQuery(text);
+    if (text.length > 2) {
+      fetch(
+        `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v6/finance/autocomplete?query=${text}&lang=en`,
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-host":
+              "stock-data-yahoo-finance-alternative.p.rapidapi.com",
+            "x-rapidapi-key":
+              "def66e2ad7msh812217da7d5b03fp19e120jsnd95c93d205bb",
+          },
+        }
+      )
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw response;
+        })
+        .then((data) => {
+          let tmpArray = [];
+          for (var i = 0; i < data.ResultSet.Result.length; i++) {
+            tmpArray.push(data.ResultSet.Result[i]);
+          }
+          setCompanies(tmpArray);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  };
+  const card = cardVisible && (selectedStock) ? (
+    <Card style={styles.card}>
+      <Card.Title
+        title={selectedStock.displayName}
+        subtitle={selectedStock.symbol}
+        left={(props) => <Avatar.Icon {...props} icon="folder" />}
+        right={(props) => (
+          <IconButton {...props} icon="dots-vertical" onPress={() => {}} />
+        )}
+      />
+      <Card.Content>
+        <Text>{selectedStock.marketState}</Text>
+        <Text>Price: {selectedStock.regularMarketPrice} {(selectedStock.regularMarketChange).toFixed(2)} {selectedStock.regularMarketChangePercent}%</Text>
+        <Text>Post Market Price: {selectedStock.postMarketPrice} {selectedStock.postMarketChange} {selectedStock.postMarketChangePercent}%</Text>
+        <Text>Previous Close: {selectedStock.regularMarketPreviousClose}</Text>
+        <Text>High: {selectedStock.regularMarketDayHigh}</Text>
+        <Text>Low: {selectedStock.regularMarketDayLow}</Text>
+        <Text>Analyst Rating: {selectedStock.averageAnalystRating}</Text>
+        <Text>Volume: {selectedStock.regularMarketVolume}</Text>
+        <Text>Market Cap: {selectedStock.marketCap}</Text>
+        <Text>P/E: {selectedStock.trailingPE}</Text>
+      </Card.Content>
+      <Card.Actions>
+      <Button icon="plus" onPress={addToList}>Add to List</Button>
+    </Card.Actions>
+    </Card>
+  ) : null;
   useEffect(() => {
-    if (query !== "") {
+    if (query !== "" && query.length > 2) {
       setMenuVisible(true);
     }
   }, [query]);
-  //   const addHandler = () => {
-  //     if (!firstname || !lastname || !email) {
-  //       alert("Please add all contact information");
-  //       return;
-  //     }
-  //     let newContact = {
-  //       firstname: firstname,
-  //       lastname: lastname,
-  //       email: email,
-  //     };
-  //     props.navigation.navigate("ScreenOne", newContact);
-  //     setFirstName("");
-  //     setLastName("");
-  //     setEmail("");
-  //   };
   return (
     <View style={styles.container}>
       <Menu
         style={styles.menu}
+        onDismiss={closeMenu}
         anchor={
           <Searchbar
             style={styles.searchBar}
@@ -46,39 +134,45 @@ const RecordInput = (props) => {
               <MaterialIcons name="cancel" size={24} color />
             )}
             value={query}
-            onChangeText={setQuery}
+            onChangeText={(text) => stockNameAutoComplete(text)}
           />
         }
         visible={menuVisible}
       >
-        {array.map((value, index) => (
+        {companies.map((value, index) => (
           <Menu.Item
-            title={`${query}_${index}`}
-            onPress={() => setMenuVisible(false)}
+            key={index}
+            title={`${value.symbol} - ${value.name}`}
+            onPress={() => onPressMenuItem(value)}
           />
         ))}
       </Menu>
+
+      {card}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    display: 'flex',
+    display: "flex",
     padding: 8,
     backgroundColor: "#ecf0f1",
-    alignItems: 'center'
-    
+    alignItems: "center",
   },
   searchBar: {
     marginTop: "2%",
     width: windowWidth * 0.95,
   },
   menu: {
-    marginTop: '15%',
+    marginTop: "15%",
     flex: 1,
-    alignSelf: 'center',
-    width: windowWidth * 0.95
+    alignSelf: "center",
+    width: windowWidth * 0.95,
+  },
+  card: {
+    width: windowWidth * 0.95,
+    marginTop: "2%",
   },
 });
 
