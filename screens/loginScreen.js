@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from "react-native";
 import {
-  Searchbar,
-  Menu,
-  Avatar,
-  Card,
-  IconButton,
-} from "react-native-paper";
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import { Searchbar, Menu, Avatar, Card, IconButton } from "react-native-paper";
 import { theme } from "../theme";
 import { addRecord } from "../redux/recordSlice";
 import { MaterialIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Dimensions } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import TextInput from '../components/textInput';
-import Button from '../components/button'
+import TextInput from "../components/textInput";
+import Button from "../components/button";
+import { auth } from "../FirebaseConfig";
+import {
+  signInWithEmailAndPassword,
+  updateProfile,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { login } from "../redux/userSlice";
 
 const emailValidator = (email) => {
   const re = /\S+@\S+\.\S+/;
@@ -34,6 +42,7 @@ const passwordValidator = (password) => {
 const LoginScreen = (props) => {
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
+  const dispatch = useDispatch();
 
   const _onLoginPressed = () => {
     const emailError = emailValidator(email.value);
@@ -44,6 +53,24 @@ const LoginScreen = (props) => {
       setPassword({ ...password, error: passwordError });
       return;
     }
+    signInWithEmailAndPassword(auth, email.value, password.value)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        let userInfo = {
+          userID: user.uid,
+          displayName: user.displayName,
+        };
+        dispatch(login(userInfo));
+        props.navigation.reset({
+          index: 0,
+          routes: [{ name: "HomeScreen" }],
+        });
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
   };
 
   return (
@@ -80,7 +107,7 @@ const LoginScreen = (props) => {
 
       <View style={styles.forgotPassword}>
         <TouchableOpacity
-          //onPress={() => navigation.navigate("ForgotPasswordScreen")}
+        //onPress={() => navigation.navigate("ForgotPasswordScreen")}
         >
           <Text style={styles.label}>Forgot your password?</Text>
         </TouchableOpacity>
@@ -92,7 +119,9 @@ const LoginScreen = (props) => {
 
       <View style={styles.row}>
         <Text style={styles.label}>Don’t have an account? </Text>
-        <TouchableOpacity onPress={() => props.navigation.navigate("RegisterScreen")}>
+        <TouchableOpacity
+          onPress={() => props.navigation.navigate("RegisterScreen")}
+        >
           <Text style={styles.link}>Sign up</Text>
         </TouchableOpacity>
       </View>
@@ -106,7 +135,7 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: "#ecf0f1",
     alignItems: "center",
-    height: "100%"
+    height: "100%",
   },
   forgotPassword: {
     width: "100%",

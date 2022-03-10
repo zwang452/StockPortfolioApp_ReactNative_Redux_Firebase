@@ -21,45 +21,69 @@ import {
 import { theme } from "../theme";
 import Button from "../components/button";
 import { borderColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
-const AccountScreen = (props) => {
-  return (
-    <View style={styles.container}>
-      <Image
-        style={{ width: 155, height: 155, marginBottom: "10%" }}
-        source={require("../financial-profit.png")}
-      />
-      <Text style={styles.header}>Login to Your Account</Text>
+import { signOut } from "firebase/auth";
+import { auth } from "../FirebaseConfig";
+import { logout } from "../redux/userSlice";
 
-      <Text style={styles.text}>Never lose your personal portfolio.</Text>
-      <Button
-        mode="contained"
-        style={styles.button}
-        uppercase={false}
-        onPress={() => props.navigation.navigate("LoginScreen")}
-      >
-        Login with Email
-      </Button>
-      <Button
-        mode="outlined"
-        style={styles.button}
-        uppercase={false}
-        onPress={() => props.navigation.navigate("RegisterScreen")}
-      >
-        Sign Up with Email
-      </Button>
-      <GoogleSocialButton
-        textStyle={styles.buttonText}
-        buttonViewStyle={{
-          borderColor: "grey",
-          borderWidth: 0.5,
-          width: "100%",
-          marginVertical: 10,
-        }}
-      ></GoogleSocialButton>
-      <FacebookSocialButton
-        textStyle={styles.buttonText}
-        buttonViewStyle={styles.button}
-      ></FacebookSocialButton>
+const AccountScreen = (props) => {
+  const userInfo = useSelector((state) => state.userReducer.userInfo);
+  const dispatch = useDispatch();
+  const signOutFromFireBase = ()=>{
+    signOut(auth).then(() => {
+      // Sign-out successful.
+      dispatch(logout());
+    }).catch((error) => {
+      // An error happened.
+    });
+  }
+  return (
+    <View>
+      {!userInfo.loggedIn && (
+        <View style={styles.container}>
+          <Image
+            style={{ width: 155, height: 155, marginBottom: "10%" }}
+            source={require("../financial-profit.png")}
+          />
+          <Text style={styles.header}>Login to Your Account</Text>
+
+          <Text style={styles.text}>Never lose your personal portfolio.</Text>
+          <Button
+            mode="contained"
+            style={styles.button}
+            uppercase={false}
+            onPress={() => props.navigation.navigate("LoginScreen")}
+          >
+            Login with Email
+          </Button>
+          <Button
+            mode="outlined"
+            style={styles.button}
+            uppercase={false}
+            onPress={() => props.navigation.navigate("RegisterScreen")}
+          >
+            Sign Up with Email
+          </Button>
+          <GoogleSocialButton
+            textStyle={styles.buttonText}
+            buttonViewStyle={{
+              borderColor: "grey",
+              borderWidth: 0.5,
+              width: "100%",
+              marginVertical: 10,
+            }}
+          ></GoogleSocialButton>
+          <FacebookSocialButton
+            textStyle={styles.buttonText}
+            buttonViewStyle={styles.button}
+          ></FacebookSocialButton>
+        </View>
+      )}
+      {userInfo.loggedIn && (
+        <View>
+          <Text>Logged in! {userInfo.displayName}</Text>
+          <Button onPress= {()=>{signOutFromFireBase()}}>signout</Button>
+        </View>
+      )}
     </View>
   );
 };
@@ -82,7 +106,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   button: {
-    width: '100%',
+    width: "100%",
     marginVertical: 10,
   },
   text: {
