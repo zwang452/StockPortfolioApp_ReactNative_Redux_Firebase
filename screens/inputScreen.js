@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Modal, TextInput } from "react-native";
-import { Searchbar, Menu, Avatar, Card, IconButton, Button } from "react-native-paper";
+import {
+  Searchbar,
+  Menu,
+  Avatar,
+  Card,
+  IconButton,
+  Button,
+} from "react-native-paper";
 import { addRecord } from "../redux/recordSlice";
 import { MaterialIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Dimensions } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
+import { XRAPIDAPIKEY } from "@env";
 
 const windowWidth = Dimensions.get("window").width;
 const RecordInput = (props) => {
@@ -16,12 +24,14 @@ const RecordInput = (props) => {
   const [companies, setCompanies] = useState([]);
   const closeMenu = () => setMenuVisible(false);
   const dispatch = useDispatch();
-  const addToList = () =>{
-    let url = {iconUrl: 'https://staffordonline.org/wp-content/uploads/2019/01/Google-600x600.jpg"'};
-    let record = {...selectedStock, ...url};
+  const addToList = () => {
+    let url = {
+      iconUrl:
+        'https://staffordonline.org/wp-content/uploads/2019/01/Google-600x600.jpg"',
+    };
+    let record = { ...selectedStock, ...url };
     dispatch(addRecord(record));
-
-  }
+  };
   const onPressMenuItem = (stock) => {
     if (stock) {
       fetch(
@@ -31,8 +41,7 @@ const RecordInput = (props) => {
           headers: {
             "x-rapidapi-host":
               "stock-data-yahoo-finance-alternative.p.rapidapi.com",
-            "x-rapidapi-key":
-              "def66e2ad7msh812217da7d5b03fp19e120jsnd95c93d205bb",
+            "x-rapidapi-key": XRAPIDAPIKEY,
           },
         }
       )
@@ -63,8 +72,7 @@ const RecordInput = (props) => {
           headers: {
             "x-rapidapi-host":
               "stock-data-yahoo-finance-alternative.p.rapidapi.com",
-            "x-rapidapi-key":
-              "def66e2ad7msh812217da7d5b03fp19e120jsnd95c93d205bb",
+            "x-rapidapi-key": XRAPIDAPIKEY,
           },
         }
       )
@@ -86,33 +94,46 @@ const RecordInput = (props) => {
         });
     }
   };
-  const card = cardVisible && (selectedStock) ? (
-    <Card style={styles.card}>
-      <Card.Title
-        title={selectedStock.displayName}
-        subtitle={selectedStock.symbol}
-        left={(props) => <Avatar.Icon {...props} icon="folder" />}
-        right={(props) => (
-          <IconButton {...props} icon="dots-vertical" onPress={() => {}} />
-        )}
-      />
-      <Card.Content>
-        <Text>{selectedStock.marketState}</Text>
-        <Text>Price: {selectedStock.regularMarketPrice} {(selectedStock.regularMarketChange).toFixed(2)} {selectedStock.regularMarketChangePercent}%</Text>
-        <Text>Post Market Price: {selectedStock.postMarketPrice} {selectedStock.postMarketChange} {selectedStock.postMarketChangePercent}%</Text>
-        <Text>Previous Close: {selectedStock.regularMarketPreviousClose}</Text>
-        <Text>High: {selectedStock.regularMarketDayHigh}</Text>
-        <Text>Low: {selectedStock.regularMarketDayLow}</Text>
-        <Text>Analyst Rating: {selectedStock.averageAnalystRating}</Text>
-        <Text>Volume: {selectedStock.regularMarketVolume}</Text>
-        <Text>Market Cap: {selectedStock.marketCap}</Text>
-        <Text>P/E: {selectedStock.trailingPE}</Text>
-      </Card.Content>
-      <Card.Actions>
-      <Button icon="plus" onPress={addToList}>Add to List</Button>
-    </Card.Actions>
-    </Card>
-  ) : null;
+  const card =
+    cardVisible && selectedStock ? (
+      <Card style={styles.card}>
+        <Card.Title
+          title={selectedStock.displayName}
+          subtitle={selectedStock.symbol}
+          left={(props) => <Avatar.Icon {...props} icon="folder" />}
+          right={(props) => (
+            <IconButton {...props} icon="dots-vertical" onPress={() => {}} />
+          )}
+        />
+        <Card.Content>
+          <Text>{selectedStock.marketState}</Text>
+          <Text>
+            Price: {selectedStock.regularMarketPrice}{" "}
+            {selectedStock.regularMarketChange.toFixed(2)}{" "}
+            {selectedStock.regularMarketChangePercent}%
+          </Text>
+          <Text>
+            Post Market Price: {selectedStock.postMarketPrice}{" "}
+            {selectedStock.postMarketChange}{" "}
+            {selectedStock.postMarketChangePercent}%
+          </Text>
+          <Text>
+            Previous Close: {selectedStock.regularMarketPreviousClose}
+          </Text>
+          <Text>High: {selectedStock.regularMarketDayHigh}</Text>
+          <Text>Low: {selectedStock.regularMarketDayLow}</Text>
+          <Text>Analyst Rating: {selectedStock.averageAnalystRating}</Text>
+          <Text>Volume: {selectedStock.regularMarketVolume}</Text>
+          <Text>Market Cap: {selectedStock.marketCap}</Text>
+          <Text>P/E: {selectedStock.trailingPE}</Text>
+        </Card.Content>
+        <Card.Actions>
+          <Button icon="plus" onPress={addToList}>
+            Add to List
+          </Button>
+        </Card.Actions>
+      </Card>
+    ) : null;
   useEffect(() => {
     if (query !== "" && query.length > 2) {
       setMenuVisible(true);
