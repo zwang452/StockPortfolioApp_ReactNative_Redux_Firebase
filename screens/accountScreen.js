@@ -24,6 +24,9 @@ import { borderColor } from "react-native/Libraries/Components/View/ReactNativeS
 import { signOut } from "firebase/auth";
 import { auth } from "../FirebaseConfig";
 import { logout } from "../redux/userSlice";
+import { loadRecords } from "../redux/recordSlice";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db} from "../FirebaseConfig";
 
 const AccountScreen = (props) => {
   const userInfo = useSelector((state) => state.userReducer.userInfo);
@@ -35,6 +38,16 @@ const AccountScreen = (props) => {
     }).catch((error) => {
       // An error happened.
     });
+  }
+  const test = async () =>{
+    let q = query(collection(db, "stocks"), where("userID", "==", userInfo.userID));
+    const querySnapshot = await getDocs(q);
+    let records = [];
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      records.push(doc.data());
+    });
+    dispatch(loadRecords(records));
   }
   return (
     <View>
@@ -82,6 +95,7 @@ const AccountScreen = (props) => {
         <View>
           <Text>Logged in! {userInfo.displayName}</Text>
           <Button onPress= {()=>{signOutFromFireBase()}}>signout</Button>
+          <Button onPress= {()=>{test()}}>test</Button>
         </View>
       )}
     </View>

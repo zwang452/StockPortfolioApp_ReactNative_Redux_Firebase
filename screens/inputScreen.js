@@ -14,6 +14,9 @@ import Constants from "expo-constants";
 import { Dimensions } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { XRAPIDAPIKEY } from "@env";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../FirebaseConfig";
+import { initializeFirestore } from "firebase/firestore";
 
 const windowWidth = Dimensions.get("window").width;
 const RecordInput = (props) => {
@@ -24,13 +27,41 @@ const RecordInput = (props) => {
   const [companies, setCompanies] = useState([]);
   const closeMenu = () => setMenuVisible(false);
   const dispatch = useDispatch();
-  const addToList = () => {
-    let url = {
-      iconUrl:
-        'https://staffordonline.org/wp-content/uploads/2019/01/Google-600x600.jpg"',
-    };
+  const userID = useSelector((state) => state.userReducer.userInfo.userID);
+  const addToList = async () => {
+    //To-do : find a company logo api from stock symbol
+    let url;
+    if (selectedStock.symbol === "GOOG") {
+      url = {
+        iconUrl:
+          "https://staffordonline.org/wp-content/uploads/2019/01/Google-600x600.jpg",
+      };
+    } else if (selectedStock.symbol === "AAPL") {
+      url = {
+        iconUrl: "https://logo.clearbit.com/apple.com",
+      };
+    } else if (selectedStock.symbol === "AMD") {
+      url = {
+        iconUrl: "https://logo.clearbit.com/amd.com",
+      };
+    } else {
+      url = {
+        iconUrl:
+          "https://static.vecteezy.com/system/resources/thumbnails/001/500/616/small/building-icon-free-vector.jpg",
+      };
+    }
     let record = { ...selectedStock, ...url };
     dispatch(addRecord(record));
+    if (userID) {
+      try {
+        const docRef = await setDoc(doc(db, "stocks", record.symbol + userID), {
+          ...record,
+          userID: userID,
+        });
+      } catch (e) {
+        console.error("Error adding document: ", e);
+      }
+    }
   };
   const onPressMenuItem = (stock) => {
     if (stock) {

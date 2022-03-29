@@ -9,6 +9,7 @@ import {LogBox} from 'react-native';
 export default function App() {
   //The issue comes from Firebase using a deprecated version of AsyncStorage.  
   LogBox.ignoreLogs(['AsyncStorage has been extracted from react-native core']);
+  LogBox.ignoreLogs(['Setting a timer']);
   return (
     <Provider store={store}>
       <PaperProvider>

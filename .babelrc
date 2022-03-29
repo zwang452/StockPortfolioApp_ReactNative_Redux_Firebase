@@ -1,7 +1,7 @@
 {
     "presets": [
         "module:metro-react-native-babel-preset",
-        "babel-preset-expo"
+        ["babel-preset-expo", {"runtime": "automatic"}]
     ],
     "plugins": [
       ["module:react-native-dotenv"]

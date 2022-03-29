@@ -9,14 +9,21 @@ import { useTheme, Portal, FAB } from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
 import { useSafeArea } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { doc, deleteDoc  } from "firebase/firestore"; 
+import { db } from "../FirebaseConfig";
 
 const ListScreen = (props) => {
   const records = useSelector((state) => state.recordReducer.records);
+  const userInfo = useSelector((state) => state.userReducer.userInfo);
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const safeArea = useSafeArea();
-  const deleteFromList = (symbol) => {
+  const deleteFromList = async (symbol) => {
     dispatch(deleteRecord(symbol));
+    if(userInfo.loggedIn){
+      await deleteDoc(doc(db, "stocks", symbol + userInfo.userID)); 
+    }
+
   };
   return (
     <View style={styles.container}>

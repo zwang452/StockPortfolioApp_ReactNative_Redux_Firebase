@@ -16,7 +16,10 @@ import { Dimensions } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import TextInput from "../components/textInput";
 import Button from "../components/button";
-import { auth } from "../FirebaseConfig";
+import { auth, db } from "../FirebaseConfig";
+import { loadRecords } from "../redux/recordSlice";
+import { collection, query, where, getDocs } from "firebase/firestore";
+
 import {
   signInWithEmailAndPassword,
   updateProfile,
@@ -43,8 +46,8 @@ const LoginScreen = (props) => {
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const dispatch = useDispatch();
-
-  const _onLoginPressed = () => {
+  //const userInfo = useSelector((state) => state.userReducer.userInfo);
+  const _onLoginPressed = async() => {
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
 
@@ -57,15 +60,28 @@ const LoginScreen = (props) => {
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
-        let userInfo = {
+        const userInfo = {
           userID: user.uid,
           displayName: user.displayName,
+          loggedIn: true
         };
         dispatch(login(userInfo));
         props.navigation.reset({
           index: 0,
           routes: [{ name: "HomeScreen" }],
         });
+        return user.uid
+      }).then((uid)=>{
+        let q = query(collection(db, "stocks"), where("userID", "==", uid));
+        return getDocs(q);
+      }).then((querySnapshot)=>{
+        let records = [];
+        querySnapshot.forEach((doc) => {
+          // doc.data() is never undefined for query doc snapshots
+          records.push(doc.data());
+        });
+        console.log(records);
+        dispatch(loadRecords(records));
       })
       .catch((error) => {
         const errorCode = error.code;

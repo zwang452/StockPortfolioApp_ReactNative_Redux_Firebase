@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 //import { getDatabase } from "firebase/database";
-import { getFirestore} from "firebase/firestore";
+import {initializeFirestore} from 'firebase/firestore'
 import { getAuth } from "firebase/auth";
 import {APIKEY, AUTHDOMAIN, PROJECTID, STORAGEBUCKET, MESSAGINGSENDERID, APPID, MEASUREMENTID} from '@env';
 
@@ -17,8 +17,9 @@ const firebaseConfig = {
   measurementId: MEASUREMENTID,
 };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
+export const db = initializeFirestore(app, {useFetchStreams: false})
 
-//export const db = getDatabase(app);
-export const firestore = getFirestore(app);
+//export const db = initializeFirestore(app, {useFetchStreams: false})
+//export const db = getFirestore(app);
 export const auth =  getAuth();

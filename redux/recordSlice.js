@@ -1,13 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   records: [
-    {
-      shortName: "Google",
-      symbol : 'test',
-      iconUrl:
-        "https://staffordonline.org/wp-content/uploads/2019/01/Google-600x600.jpg",
-      regularMarketPrice: 2730.2,
-    },
+    // {
+    //   shortName: "Google",
+    //   symbol : 'test',
+    //   iconUrl:
+    //     "https://staffordonline.org/wp-content/uploads/2019/01/Google-600x600.jpg",
+    //   regularMarketPrice: 2730.2,
+    //   userID : null
+    // },
   ],
 };
 
@@ -32,10 +33,13 @@ export const recordSlice = createSlice({
         (item) => action.payload !== item.symbol
       );
     },
+    loadRecords:(state,action)=>{
+      state.records = action.payload;
+    }
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { addRecord, decrement, deleteRecord } = recordSlice.actions;
+export const { addRecord, decrement, deleteRecord, loadRecords } = recordSlice.actions;
 
 export default recordSlice.reducer;
